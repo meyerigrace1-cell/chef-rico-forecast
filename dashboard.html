@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chef Rico's Food Truck — Demand Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f1ec; margin: 0; padding: 20px; color: #2b2b2b; }
+  h1 { text-align: center; color: #b5451b; }
+  .card { background: white; border-radius: 10px; padding: 20px; margin: 20px auto; max-width: 700px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  label { display: block; margin-top: 10px; font-weight: bold; }
+  input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+  button { margin-top: 15px; padding: 10px 20px; background: #b5451b; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #943813; }
+  .result { margin-top: 15px; font-size: 1.3em; font-weight: bold; color: #1a7a3c; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em; }
+  th { background: #b5451b; color: white; }
+</style>
+</head>
+<body>
+
+<h1>Chef Rico's Food Truck — Demand Dashboard</h1>
+
+<div class="card">
+  <h2>Predict Demand</h2>
+  <label>Weekend?</label>
+  <select id="p_weekend"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Payday?</label>
+  <select id="p_payday"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Rainy?</label>
+  <select id="p_rainy"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Event nearby?</label>
+  <select id="p_event"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>NTSA crackdown?</label>
+  <select id="p_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Month (1-12)</label>
+  <input type="number" id="p_month" value="10" min="1" max="12">
+  <label>Day of month</label>
+  <input type="number" id="p_day" value="2" min="1" max="31">
+  <button onclick="predictDemand()">Predict</button>
+  <div class="result" id="predict_result"></div>
+</div>
+
+<div class="card">
+  <h2>Add Daily Sales Record</h2>
+  <label>Date</label>
+  <input type="date" id="s_date">
+  <label>Day of week</label>
+  <input type="text" id="s_dow" placeholder="e.g. Friday">
+  <label>Weekend?</label>
+  <select id="s_weekend"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Payday?</label>
+  <select id="s_payday"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Rainy?</label>
+  <select id="s_rainy"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Event nearby?</label>
+  <select id="s_event"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>NTSA crackdown?</label>
+  <select id="s_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
+  <label>Burgers sold</label>
+  <input type="number" id="s_burgers" value="0">
+  <button onclick="addSale()">Save Record</button>
+  <div class="result" id="save_result"></div>
+</div>
+
+<div class="card">
+  <h2>Demand Trends</h2>
+  <canvas id="trendChart" height="150"></canvas>
+  <table id="salesTable">
+    <thead><tr><th>Date</th><th>Day</th><th>Burgers Sold</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const API = window.location.origin;
+
+async function predictDemand() {
+  const body = {
+    is_weekend: Number(document.getElementById("p_weekend").value),
+    is_payday: Number(document.getElementById("p_payday").value),
+    is_rainy: Number(document.getElementById("p_rainy").value),
+    is_event: Number(document.getElementById("p_event").value),
+    ntsa_crackdown: Number(document.getElementById("p_ntsa").value),
+    month: Number(document.getElementById("p_month").value),
+    day_of_month: Number(document.getElementById("p_day").value),
+  };
+  const res = await fetch(`${API}/predict`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  document.getElementById("predict_result").innerText =
+    `Predicted burgers sold: ${data.predicted_burgers_sold}`;
+}
+
+async function addSale() {
+  const body = {
+    date: document.getElementById("s_date").value,
+    day_of_week: document.getElementById("s_dow").value,
+    is_weekend: Number(document.getElementById("s_weekend").value),
+    is_payday: Number(document.getElementById("s_payday").value),
+    is_rainy: Number(document.getElementById("s_rainy").value),
+    is_event: Number(document.getElementById("s_event").value),
+    ntsa_crackdown: Number(document.getElementById("s_ntsa").value),
+    burgers_sold: Number(document.getElementById("s_burgers").value),
+  };
+  const res = await fetch(`${API}/sales`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  document.getElementById("save_result").innerText = "Saved! ID: " + data.id;
+  loadTrends();
+}
+
+let chart;
+async function loadTrends() {
+  const res = await fetch(`${API}/sales`);
+  const sales = await res.json();
+
+  const tbody = document.querySelector("#salesTable tbody");
+  tbody.innerHTML = "";
+  sales.forEach(s => {
+    tbody.innerHTML += `<tr><td>${s.date}</td><td>${s.day_of_week}</td><td>${s.burgers_sold}</td></tr>`;
+  });
+
+  const labels = sales.map(s => s.date);
+  const values = sales.map(s => s.burgers_sold);
+
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{ label: "Burgers Sold", data: values, borderColor: "#b5451b", backgroundColor: "rgba(181,69,27,0.1)", fill: true, tension: 0.3 }]
+    },
+    options: { responsive: true }
+  });
+}
+
+loadTrends();
+</script>
+
+</body>
+</html>
