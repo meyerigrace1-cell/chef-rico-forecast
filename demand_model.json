@@ -1,0 +1,81 @@
+{
+  "model_name": "Multiple Linear Regression (OLS)",
+  "version": "1.0.0",
+  "trained_at": "2026-11-10T06:50:34+00:00",
+  "features": [
+    "dow_2",
+    "dow_3",
+    "dow_4",
+    "dow_5",
+    "dow_6",
+    "dow_7",
+    "is_payday",
+    "is_promo",
+    "is_school_holiday",
+    "season_sin",
+    "season_cos"
+  ],
+  "intercept": 4392.2093,
+  "coefficients": {
+    "dow_2": -460.1028,
+    "dow_3": -589.21,
+    "dow_4": -709.2026,
+    "dow_5": -354.7722,
+    "dow_6": 479.5774,
+    "dow_7": -0.0,
+    "is_payday": 471.5763,
+    "is_promo": 1247.5176,
+    "is_school_holiday": 56.7955,
+    "season_sin": 140.635,
+    "season_cos": 318.3311
+  },
+  "metrics": {
+    "mae": 419.64,
+    "rmse": 536.01,
+    "r2": 0.6136,
+    "mape": 9.75
+  },
+  "baseline_mae": 776.51,
+  "comparison": [
+    {
+      "model": "Baseline (training mean)",
+      "mae": 776.51,
+      "rmse": 914.68,
+      "r2": -0.1253,
+      "mape": 18.58
+    },
+    {
+      "model": "Linear Regression",
+      "mae": 419.64,
+      "rmse": 536.01,
+      "r2": 0.6136,
+      "mape": 9.75
+    },
+    {
+      "model": "Random Forest (tuned)",
+      "mae": 387.84,
+      "rmse": 481.67,
+      "r2": 0.6879,
+      "mape": 9.08
+    }
+  ],
+  "random_forest_params": {
+    "n_estimators": 100,
+    "max_depth": null,
+    "min_samples_leaf": 1
+  },
+  "days_without_data": [
+    7
+  ],
+  "split": {
+    "train": 546,
+    "validation": 117,
+    "test": 118
+  },
+  "dataset": {
+    "source": "Kaggle - Rossmann Store Sales (Store 1, trading days)",
+    "rows": 781,
+    "start": "2013-01-02",
+    "end": "2015-07-31"
+  }
+}

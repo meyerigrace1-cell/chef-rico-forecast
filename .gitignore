@@ -1,4 +1,11 @@
 venv/
+.venv/
 .env
 __pycache__/
 *.pyc
+# Large raw Kaggle files (the prepared dataset is small and IS committed)
+train.csv
+test.csv
+store.csv
+kaggle_train.csv
+*.zip

@@ -1,0 +1,34 @@
+{
+  "rows": 781,
+  "mean_sales": 4759.1,
+  "is_promo": {
+    "no": 4319.8,
+    "yes": 5300.1,
+    "pct_change": 22.7
+  },
+  "is_school_holiday": {
+    "no": 4749.5,
+    "yes": 4796.3,
+    "pct_change": 1.0
+  },
+  "is_payday": {
+    "no": 4657.5,
+    "yes": 5254.1,
+    "pct_change": 12.8
+  },
+  "by_day_of_week": {
+    "Monday": 5178.0,
+    "Tuesday": 4685.6,
+    "Wednesday": 4555.7,
+    "Thursday": 4457.8,
+    "Friday": 4726.5,
+    "Saturday": 4943.0
+  },
+  "correlation": {
+    "day_of_week": -0.051,
+    "is_payday": 0.222,
+    "is_promo": 0.482,
+    "is_school_holiday": 0.019,
+    "month": 0.109
+  }
+}

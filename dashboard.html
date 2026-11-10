@@ -2,148 +2,209 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Chef Rico's Food Truck — Demand Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chef Rico's Food Truck - Demand Forecast Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; background: #f4f1ec; margin: 0; padding: 20px; color: #2b2b2b; }
-  h1 { text-align: center; color: #b5451b; }
-  .card { background: white; border-radius: 10px; padding: 20px; margin: 20px auto; max-width: 700px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  label { display: block; margin-top: 10px; font-weight: bold; }
-  input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-  button { margin-top: 15px; padding: 10px 20px; background: #b5451b; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  :root { --brand:#b5451b; --ink:#2b2b2b; --muted:#6b6b6b; --bg:#f4f1ec; --card:#ffffff; --ok:#1a7a3c; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); margin: 0; color: var(--ink); }
+  header { background: var(--brand); color: #fff; padding: 18px 20px; text-align: center; }
+  header h1 { margin: 0; font-size: 1.4rem; }
+  header p { margin: 4px 0 0; font-size: .9rem; opacity: .9; }
+  main { max-width: 1000px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .wide { grid-column: 1 / -1; }
+  h2 { margin: 0 0 10px; font-size: 1.1rem; color: var(--brand); }
+  label { display: block; margin-top: 10px; font-weight: 600; font-size: .9rem; }
+  input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #ccc; font-size: .95rem; }
+  button { margin-top: 14px; padding: 10px 18px; background: var(--brand); color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: .95rem; }
   button:hover { background: #943813; }
-  .result { margin-top: 15px; font-size: 1.3em; font-weight: bold; color: #1a7a3c; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 0.9em; }
-  th { background: #b5451b; color: white; }
+  .result { margin-top: 14px; padding: 12px; background: #eef7f0; border-radius: 8px; display: none; }
+  .result .big { font-size: 1.8rem; font-weight: 700; color: var(--ok); }
+  .msg { margin-top: 10px; font-size: .9rem; color: var(--ok); }
+  .err { color: #b00020; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+  .kpi { background: #faf6f1; border-radius: 8px; padding: 10px; text-align: center; }
+  .kpi b { display: block; font-size: 1.25rem; color: var(--brand); }
+  .kpi span { font-size: .75rem; color: var(--muted); }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: .85rem; }
+  .bar-row .name { width: 130px; }
+  .bar-track { flex: 1; height: 12px; background: #eee; border-radius: 6px; position: relative; }
+  .bar-fill { position: absolute; top: 0; height: 100%; border-radius: 6px; }
+  .bar-row .val { width: 70px; text-align: right; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .85rem; }
+  th, td { border: 1px solid #e3e3e3; padding: 6px; text-align: center; }
+  th { background: var(--brand); color: #fff; }
+  .note { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
+<header>
+  <h1>Chef Rico's Food Truck - Demand Forecast Dashboard</h1>
+  <p>Cloud-based machine learning system for daily demand forecasting</p>
+</header>
 
-<h1>Chef Rico's Food Truck — Demand Dashboard</h1>
+<main>
+  <section class="card">
+    <h2>Forecast demand for a day</h2>
+    <label for="p_date">Date</label>
+    <input type="date" id="p_date">
+    <label for="p_promo">Promotion running?</label>
+    <select id="p_promo"><option value="0">No</option><option value="1">Yes</option></select>
+    <label for="p_school">School holiday?</label>
+    <select id="p_school"><option value="0">No</option><option value="1">Yes</option></select>
+    <button onclick="predictDemand()">Forecast</button>
+    <div class="result" id="p_result"></div>
+  </section>
 
-<div class="card">
-  <h2>Predict Demand</h2>
-  <label>Weekend?</label>
-  <select id="p_weekend"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Payday?</label>
-  <select id="p_payday"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Rainy?</label>
-  <select id="p_rainy"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Event nearby?</label>
-  <select id="p_event"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>NTSA crackdown?</label>
-  <select id="p_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Month (1-12)</label>
-  <input type="number" id="p_month" value="10" min="1" max="12">
-  <label>Day of month</label>
-  <input type="number" id="p_day" value="2" min="1" max="31">
-  <button onclick="predictDemand()">Predict</button>
-  <div class="result" id="predict_result"></div>
-</div>
+  <section class="card">
+    <h2>Record a day's actual sales</h2>
+    <label for="s_date">Date</label>
+    <input type="date" id="s_date">
+    <label for="s_promo">Promotion running?</label>
+    <select id="s_promo"><option value="0">No</option><option value="1">Yes</option></select>
+    <label for="s_school">School holiday?</label>
+    <select id="s_school"><option value="0">No</option><option value="1">Yes</option></select>
+    <label for="s_sales">Actual daily sales</label>
+    <input type="number" id="s_sales" min="0" placeholder="e.g. 5200">
+    <button onclick="addSale()">Save record</button>
+    <div class="msg" id="s_msg"></div>
+  </section>
 
-<div class="card">
-  <h2>Add Daily Sales Record</h2>
-  <label>Date</label>
-  <input type="date" id="s_date">
-  <label>Day of week</label>
-  <input type="text" id="s_dow" placeholder="e.g. Friday">
-  <label>Weekend?</label>
-  <select id="s_weekend"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Payday?</label>
-  <select id="s_payday"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Rainy?</label>
-  <select id="s_rainy"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Event nearby?</label>
-  <select id="s_event"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>NTSA crackdown?</label>
-  <select id="s_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
-  <label>Burgers sold</label>
-  <input type="number" id="s_burgers" value="0">
-  <button onclick="addSale()">Save Record</button>
-  <div class="result" id="save_result"></div>
-</div>
+  <section class="card wide">
+    <h2>Model performance and what drives demand</h2>
+    <div class="kpis" id="kpis"></div>
+    <div id="effects"></div>
+    <p class="note" id="model_note"></p>
+  </section>
 
-<div class="card">
-  <h2>Demand Trends</h2>
-  <canvas id="trendChart" height="150"></canvas>
-  <table id="salesTable">
-    <thead><tr><th>Date</th><th>Day</th><th>Burgers Sold</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <section class="card wide">
+    <h2>Demand trend</h2>
+    <canvas id="trendChart" height="110"></canvas>
+    <table id="salesTable">
+      <thead><tr><th>Date</th><th>Day</th><th>Promo</th><th>School holiday</th><th>Sales</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="note" id="table_note"></p>
+  </section>
+</main>
 
 <script>
-const API = window.location.origin;
+const API = location.origin.startsWith("http") ? location.origin : "http://127.0.0.1:8000";
+const yn = v => (v ? "Yes" : "No");
+const today = new Date().toISOString().slice(0, 10);
+document.getElementById("p_date").value = today;
+document.getElementById("s_date").value = today;
 
 async function predictDemand() {
-  const body = {
-    is_weekend: Number(document.getElementById("p_weekend").value),
-    is_payday: Number(document.getElementById("p_payday").value),
-    is_rainy: Number(document.getElementById("p_rainy").value),
-    is_event: Number(document.getElementById("p_event").value),
-    ntsa_crackdown: Number(document.getElementById("p_ntsa").value),
-    month: Number(document.getElementById("p_month").value),
-    day_of_month: Number(document.getElementById("p_day").value),
-  };
-  const res = await fetch(`${API}/predict`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  document.getElementById("predict_result").innerText =
-    `Predicted burgers sold: ${data.predicted_burgers_sold}`;
+  const box = document.getElementById("p_result");
+  box.style.display = "block";
+  box.innerHTML = "Working...";
+  try {
+    const res = await fetch(API + "/predict", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        date: document.getElementById("p_date").value,
+        is_promo: Number(document.getElementById("p_promo").value),
+        is_school_holiday: Number(document.getElementById("p_school").value),
+      })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || "Request failed");
+    box.innerHTML = `<div>${d.day}, ${d.date}</div>
+      <div class="big">${d.predicted_sales.toLocaleString()}</div>
+      <div>Likely range: ${d.likely_range_low.toLocaleString()} - ${d.likely_range_high.toLocaleString()}
+      (typical error about ${Math.round(d.typical_error_mae).toLocaleString()})</div>
+      ${d.warning ? `<div class="err" style="margin-top:6px">${d.warning}</div>` : ""}`;
+  } catch (e) { box.innerHTML = `<span class="err">${e.message}</span>`; }
 }
 
 async function addSale() {
-  const body = {
-    date: document.getElementById("s_date").value,
-    day_of_week: document.getElementById("s_dow").value,
-    is_weekend: Number(document.getElementById("s_weekend").value),
-    is_payday: Number(document.getElementById("s_payday").value),
-    is_rainy: Number(document.getElementById("s_rainy").value),
-    is_event: Number(document.getElementById("s_event").value),
-    ntsa_crackdown: Number(document.getElementById("s_ntsa").value),
-    burgers_sold: Number(document.getElementById("s_burgers").value),
-  };
-  const res = await fetch(`${API}/sales`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  document.getElementById("save_result").innerText = "Saved! ID: " + data.id;
-  loadTrends();
+  const msg = document.getElementById("s_msg");
+  msg.className = "msg"; msg.textContent = "Saving...";
+  try {
+    const res = await fetch(API + "/sales", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        date: document.getElementById("s_date").value,
+        is_promo: Number(document.getElementById("s_promo").value),
+        is_school_holiday: Number(document.getElementById("s_school").value),
+        daily_sales: Number(document.getElementById("s_sales").value),
+      })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error("Please check the date and sales value.");
+    msg.textContent = "Saved (record #" + d.id + ").";
+    loadTrends();
+  } catch (e) { msg.className = "msg err"; msg.textContent = e.message; }
 }
 
 let chart;
 async function loadTrends() {
-  const res = await fetch(`${API}/sales`);
+  const res = await fetch(API + "/sales");
   const sales = await res.json();
-
   const tbody = document.querySelector("#salesTable tbody");
   tbody.innerHTML = "";
-  sales.forEach(s => {
-    tbody.innerHTML += `<tr><td>${s.date}</td><td>${s.day_of_week}</td><td>${s.burgers_sold}</td></tr>`;
+  sales.slice(-12).reverse().forEach(s => {
+    const tr = document.createElement("tr");
+    [s.date, s.day, yn(s.is_promo), yn(s.is_school_holiday), s.daily_sales]
+      .forEach(v => { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+    tbody.appendChild(tr);
   });
-
-  const labels = sales.map(s => s.date);
-  const values = sales.map(s => s.burgers_sold);
-
+  document.getElementById("table_note").textContent =
+    "Showing the latest 12 of " + sales.length + " stored records (cloud PostgreSQL database).";
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById("trendChart"), {
     type: "line",
-    data: {
-      labels: labels,
-      datasets: [{ label: "Burgers Sold", data: values, borderColor: "#b5451b", backgroundColor: "rgba(181,69,27,0.1)", fill: true, tension: 0.3 }]
-    },
-    options: { responsive: true }
+    data: { labels: sales.map(s => s.date),
+            datasets: [{ label: "Daily sales", data: sales.map(s => s.daily_sales),
+                         borderColor: "#b5451b", backgroundColor: "rgba(181,69,27,.1)",
+                         fill: true, tension: .25, pointRadius: 0, borderWidth: 1.5 }] },
+    options: { responsive: true, scales: { x: { ticks: { maxTicksLimit: 8 } } } }
   });
 }
 
-loadTrends();
-</script>
+async function loadModel() {
+  try {
+    const res = await fetch(API + "/model-info");
+    if (!res.ok) throw new Error();
+    const m = await res.json();
+    const k = [
+      [Math.round(m.metrics.mae).toLocaleString(), "Typical error (MAE)"],
+      [m.metrics.mape.toFixed(1) + "%", "Average % error"],
+      [m.metrics.r2.toFixed(2), "R-squared"],
+      [m.dataset.rows.toLocaleString(), "Days of history"],
+    ];
+    document.getElementById("kpis").innerHTML =
+      k.map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("");
+    const labels = { is_promo: "Promotion", is_school_holiday: "School holiday",
+                     is_payday: "Payday window", season_sin: "Seasonality (sine)", season_cos: "Seasonality (cosine)", dow_2: "Tuesday vs Monday", dow_3: "Wednesday vs Monday",
+                     dow_4: "Thursday vs Monday", dow_5: "Friday vs Monday", dow_6: "Saturday vs Monday",
+                     dow_7: "Sunday vs Monday" };
+    const skip = (m.days_without_data || []).map(d => "dow_" + d);
+    const entries = Object.entries(m.coefficients).filter(([f]) => !skip.includes(f));
+    const max = Math.max(...entries.map(([, c]) => Math.abs(c)));
+    document.getElementById("effects").innerHTML = entries
+      .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+      .map(([f, c]) => {
+        const w = Math.abs(c) / max * 50;
+        const style = c >= 0 ? `left:50%;width:${w}%;background:#b5451b` : `left:${50 - w}%;width:${w}%;background:#185fa5`;
+        return `<div class="bar-row"><div class="name">${labels[f] || f}</div>
+          <div class="bar-track"><div class="bar-fill" style="${style}"></div></div>
+          <div class="val">${c >= 0 ? "+" : ""}${Math.round(c)}</div></div>`;
+      }).join("");
+    document.getElementById("model_note").textContent =
+      `${m.model_name}, trained on ${m.dataset.source}, ${m.dataset.start} to ${m.dataset.end}. ` +
+      `Bars show how much each factor raises (right) or lowers (left) expected daily sales.`;
+  } catch (e) {
+    document.getElementById("model_note").textContent = "Model information is not available yet.";
+  }
+}
 
+loadTrends();
+loadModel();
+</script>
 </body>
 </html>

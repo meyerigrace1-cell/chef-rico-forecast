@@ -1,0 +1,5 @@
+# Only needed on your laptop for data prep, training and charts
+pandas
+numpy
+matplotlib
+scikit-learn
