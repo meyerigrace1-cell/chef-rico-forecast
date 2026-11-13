@@ -5,8 +5,8 @@ Endpoints
   GET  /            web dashboard
   GET  /health      monitoring: API, database and model status
   GET  /model-info  model details and accuracy
-  POST /predict     forecast daily sales for a date
-  POST /sales       store a daily sales record in the cloud database
+  POST /predict     forecast burgers for a night
+  POST /sales       store a night's actual sales in the cloud database
   GET  /sales       list stored sales records
   GET  /docs        interactive API documentation (Swagger UI)
 """
@@ -41,21 +41,27 @@ def load_model():
 
 MODEL = load_model()
 
-app = FastAPI(title="Chef Rico Demand Forecast API", version="1.0.0")
+LABELS = {"is_payday": "Pay-day window", "is_public_holiday": "Public holiday",
+          "is_event": "Nairobi event nearby", "is_ntsa_crackdown": "NTSA crackdown",
+          "rain_mm": "Rainfall"}
+
+app = FastAPI(title="Chef Rico Demand Forecast API", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
 class PredictIn(BaseModel):
     date: dt.date
-    is_promo: int = Field(0, ge=0, le=1)
-    is_school_holiday: int = Field(0, ge=0, le=1)
+    is_event: int = Field(0, ge=0, le=1)
+    is_ntsa_crackdown: int = Field(0, ge=0, le=1)
+    rain_mm: float = Field(0.0, ge=0, le=300)
 
 
 class SaleIn(BaseModel):
     date: dt.date
-    is_promo: int = Field(0, ge=0, le=1)
-    is_school_holiday: int = Field(0, ge=0, le=1)
-    daily_sales: int = Field(..., ge=0)
+    is_event: int = Field(0, ge=0, le=1)
+    is_ntsa_crackdown: int = Field(0, ge=0, le=1)
+    rain_mm: float = Field(0.0, ge=0, le=300)
+    burgers_sold: int = Field(..., ge=0, le=5000)
 
 
 @app.get("/", include_in_schema=False)
@@ -90,34 +96,39 @@ def model_info():
 def predict(body: PredictIn):
     if MODEL is None:
         raise HTTPException(status_code=503, detail="Model not found. Run train_model.py and redeploy.")
-    values = feature_dict(body.date, body.is_promo, body.is_school_holiday)
-    prediction = MODEL["intercept"] + sum(MODEL["coefficients"][f] * values[f] for f in MODEL["features"])
-    prediction = max(0.0, prediction)
+    values = feature_dict(body.date, body.is_event, body.is_ntsa_crackdown, body.rain_mm)
+    contributions = {f: MODEL["coefficients"][f] * values[f] for f in MODEL["features"]}
+    prediction = max(0.0, MODEL["intercept"] + sum(contributions.values()))
     mae = MODEL["metrics"]["mae"]
     dow, _, _ = derive(body.date)
-    warning = None
-    if dow in MODEL.get("days_without_data", []):
-        warning = f"The training data has no trading on {DAY_NAMES[dow]}s, so treat this forecast with caution."
+
+    # "Why this forecast": the factors that are switched on, with their effect in burgers
+    drivers = [{"factor": LABELS[f], "effect": round(contributions[f])}
+               for f in LABELS if abs(contributions.get(f, 0)) >= 0.5]
+    day_effect = sum(contributions[f] for f in MODEL["features"] if f.startswith("dow_"))
+    if abs(day_effect) >= 0.5:
+        drivers.insert(0, {"factor": f"{DAY_NAMES[dow]} (vs Monday)", "effect": round(day_effect)})
+
     return {
         "date": str(body.date),
         "day": DAY_NAMES[dow],
-        "predicted_sales": round(prediction),
+        "predicted_burgers": round(prediction),
         "likely_range_low": round(max(0.0, prediction - mae)),
         "likely_range_high": round(prediction + mae),
         "typical_error_mae": mae,
+        "drivers": drivers,
         "model": MODEL["model_name"],
-        "warning": warning,
     }
 
 
 @app.post("/sales")
 def add_sale(body: SaleIn):
-    dow, _, payday = derive(body.date)
+    dow, payday, holiday = derive(body.date)
     with SessionLocal() as db:
         record = Sale(
-            date=body.date, day_of_week=dow, is_payday=payday,
-            is_promo=body.is_promo, is_school_holiday=body.is_school_holiday,
-            daily_sales=body.daily_sales,
+            date=body.date, day_of_week=dow, is_payday=payday, is_public_holiday=holiday,
+            is_event=body.is_event, is_ntsa_crackdown=body.is_ntsa_crackdown,
+            rain_mm=body.rain_mm, burgers_sold=body.burgers_sold,
         )
         db.add(record)
         db.commit()
@@ -132,9 +143,9 @@ def list_sales(limit: int = 2000):
     return [
         {
             "id": r.id, "date": str(r.date), "day": DAY_NAMES[r.day_of_week],
-            "is_payday": r.is_payday, "is_promo": r.is_promo,
-            "is_school_holiday": r.is_school_holiday,
-            "daily_sales": r.daily_sales,
+            "is_payday": r.is_payday, "is_public_holiday": r.is_public_holiday,
+            "is_event": r.is_event, "is_ntsa_crackdown": r.is_ntsa_crackdown,
+            "rain_mm": r.rain_mm, "burgers_sold": r.burgers_sold,
         }
         for r in rows
     ]

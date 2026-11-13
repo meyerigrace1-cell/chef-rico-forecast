@@ -1,0 +1,29 @@
+{
+  "baseline_burgers_monday": 70,
+  "weekday_effect": {
+    "Tuesday": 3,
+    "Wednesday": 8,
+    "Thursday": 20,
+    "Friday": 45,
+    "Saturday": 55,
+    "Sunday": 10
+  },
+  "payday_window_28th_to_2nd": 25,
+  "payday_friday_extra": 20,
+  "public_holiday": 15,
+  "nairobi_event_nearby": 50,
+  "ntsa_crackdown": -35,
+  "rain_per_mm_capped_at_20mm": -2.2,
+  "probability_event": {
+    "Fri_Sat": 0.22,
+    "other_nights": 0.07
+  },
+  "probability_ntsa_crackdown": {
+    "Fri_Sat": 0.12,
+    "Thu_Sun": 0.06,
+    "other_nights": 0.02
+  },
+  "rain_amount_when_raining": "gamma(shape=1.2, scale=8) mm, capped at 60 mm",
+  "noise": "normal, standard deviation = 8% of expected demand + 4 burgers",
+  "seed": 2026
+}

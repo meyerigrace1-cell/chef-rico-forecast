@@ -2,34 +2,34 @@
   "comparison": [
     {
       "model": "Baseline (training mean)",
-      "mae": 776.51,
-      "rmse": 914.68,
-      "r2": -0.1253,
-      "mape": 18.58
+      "mae": 26.63,
+      "rmse": 35.48,
+      "r2": -0.0168,
+      "mape": 29.71
     },
     {
       "model": "Linear Regression",
-      "mae": 419.64,
-      "rmse": 536.01,
-      "r2": 0.6136,
-      "mape": 9.75
+      "mae": 8.95,
+      "rmse": 11.26,
+      "r2": 0.8976,
+      "mape": 9.8
     },
     {
       "model": "Random Forest (tuned)",
-      "mae": 387.84,
-      "rmse": 481.67,
-      "r2": 0.6879,
-      "mape": 9.08
+      "mae": 10.67,
+      "rmse": 14.17,
+      "r2": 0.8379,
+      "mape": 11.6
     }
   ],
   "split": {
-    "train": 546,
-    "validation": 117,
-    "test": 118
+    "train": 724,
+    "validation": 155,
+    "test": 156
   },
   "rf_params": {
-    "n_estimators": 100,
-    "max_depth": null,
+    "n_estimators": 300,
+    "max_depth": 8,
     "min_samples_leaf": 1
   }
 }

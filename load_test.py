@@ -17,7 +17,7 @@ base = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000").rstrip("/
 total = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 users = int(sys.argv[3]) if len(sys.argv) > 3 else 10
 
-payload = json.dumps({"date": "2015-07-31", "is_promo": 1, "is_school_holiday": 0}).encode()
+payload = json.dumps({"date": "2026-11-13", "is_event": 1, "is_ntsa_crackdown": 0, "rain_mm": 0}).encode()
 
 
 def one_call(_):

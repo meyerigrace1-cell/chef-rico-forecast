@@ -1,34 +1,60 @@
 {
-  "rows": 781,
-  "mean_sales": 4759.1,
-  "is_promo": {
-    "no": 4319.8,
-    "yes": 5300.1,
-    "pct_change": 22.7
+  "nights": 1035,
+  "mean_burgers": 94.2,
+  "median_burgers": 87.0,
+  "std_burgers": 33.6,
+  "min_burgers": 10,
+  "max_burgers": 247,
+  "is_rainy": {
+    "label": "Rainy night (>= 2 mm)",
+    "no": 98.7,
+    "yes": 77.1,
+    "pct_change": -21.9,
+    "nights": 219
   },
-  "is_school_holiday": {
-    "no": 4749.5,
-    "yes": 4796.3,
-    "pct_change": 1.0
+  "is_event": {
+    "label": "Nairobi event nearby",
+    "no": 88.1,
+    "yes": 144.8,
+    "pct_change": 64.4,
+    "nights": 111
+  },
+  "is_ntsa_crackdown": {
+    "label": "NTSA crackdown",
+    "no": 95.0,
+    "yes": 78.8,
+    "pct_change": -17.0,
+    "nights": 50
   },
   "is_payday": {
-    "no": 4657.5,
-    "yes": 5254.1,
-    "pct_change": 12.8
+    "label": "Pay-day window (28th-2nd)",
+    "no": 89.5,
+    "yes": 115.7,
+    "pct_change": 29.3,
+    "nights": 185
+  },
+  "is_public_holiday": {
+    "label": "Public holiday",
+    "no": 93.5,
+    "yes": 118.2,
+    "pct_change": 26.4,
+    "nights": 27
   },
   "by_day_of_week": {
-    "Monday": 5178.0,
-    "Tuesday": 4685.6,
-    "Wednesday": 4555.7,
-    "Thursday": 4457.8,
-    "Friday": 4726.5,
-    "Saturday": 4943.0
+    "Monday": 75.1,
+    "Tuesday": 76.3,
+    "Wednesday": 78.9,
+    "Thursday": 92.1,
+    "Friday": 124.2,
+    "Saturday": 131.3,
+    "Sunday": 81.3
   },
   "correlation": {
-    "day_of_week": -0.051,
-    "is_payday": 0.222,
-    "is_promo": 0.482,
-    "is_school_holiday": 0.019,
-    "month": 0.109
+    "day_of_week": 0.371,
+    "is_payday": 0.299,
+    "is_public_holiday": 0.117,
+    "is_event": 0.523,
+    "is_ntsa_crackdown": -0.103,
+    "rain_mm": -0.327
   }
 }

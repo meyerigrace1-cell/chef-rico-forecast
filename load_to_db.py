@@ -1,6 +1,6 @@
 """
-Step 4 - Load the prepared dataset into the cloud database (Neon PostgreSQL).
-Creates the table if needed, clears old rows, then inserts the new data.
+Step 4 - Load the dataset into the cloud database (Neon PostgreSQL).
+Creates the table if needed, clears old rows, then inserts the data.
 
 Run:  python load_to_db.py
 """
@@ -15,9 +15,11 @@ records = [
         "date": r.date.date(),
         "day_of_week": int(r.day_of_week),
         "is_payday": int(r.is_payday),
-        "is_promo": int(r.is_promo),
-        "is_school_holiday": int(r.is_school_holiday),
-        "daily_sales": int(r.daily_sales),
+        "is_public_holiday": int(r.is_public_holiday),
+        "is_event": int(r.is_event),
+        "is_ntsa_crackdown": int(r.is_ntsa_crackdown),
+        "rain_mm": float(r.rain_mm),
+        "burgers_sold": int(r.burgers_sold),
     }
     for r in df.itertuples()
 ]

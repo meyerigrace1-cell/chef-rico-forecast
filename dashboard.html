@@ -5,86 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chef Rico's Food Truck - Demand Forecast Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --brand:#b5451b; --ink:#2b2b2b; --muted:#6b6b6b; --bg:#f4f1ec; --card:#ffffff; --ok:#1a7a3c; }
+  :root {
+    --cream:#fff7f2; --cream-2:#fbeae6; --card:#fffdfb; --line:#f0d6d2;
+    --rose:#d9667a; --pom:#9b1b3a; --pom-d:#7a1230; --blush:#fbe3e6;
+    --gold:#c79a4b; --gold-d:#9a6e1f; --petal:#ecc9c6;
+    --plum:#3d1f2b; --ink:#4a2b36; --muted:#8c6b72; --warn:#9a6e1f;
+  }
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); margin: 0; color: var(--ink); }
-  header { background: var(--brand); color: #fff; padding: 18px 20px; text-align: center; }
-  header h1 { margin: 0; font-size: 1.4rem; }
-  header p { margin: 4px 0 0; font-size: .9rem; opacity: .9; }
-  main { max-width: 1000px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
-  .card { background: var(--card); border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  body { font-family: "Nunito", "Segoe UI", Arial, sans-serif; background: var(--cream); margin: 0; color: var(--ink); }
+  header { background: linear-gradient(135deg, var(--pom-d), var(--pom) 55%, var(--rose)); color: var(--cream); padding: 26px 20px 30px; text-align: center; border-bottom-left-radius: 28px; border-bottom-right-radius: 28px; box-shadow: 0 6px 18px rgba(122,18,48,.25); border-bottom: 4px solid var(--gold); }
+  header h1 { margin: 0; font-size: 1.55rem; font-weight: 800; letter-spacing: .2px; }
+  header p { margin: 6px 0 0; font-size: .95rem; opacity: .95; }
+  main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 32px; display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; box-shadow: 0 4px 14px rgba(155,27,58,.07); }
   .wide { grid-column: 1 / -1; }
-  h2 { margin: 0 0 10px; font-size: 1.1rem; color: var(--brand); }
-  label { display: block; margin-top: 10px; font-weight: 600; font-size: .9rem; }
-  input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #ccc; font-size: .95rem; }
-  button { margin-top: 14px; padding: 10px 18px; background: var(--brand); color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: .95rem; }
-  button:hover { background: #943813; }
-  .result { margin-top: 14px; padding: 12px; background: #eef7f0; border-radius: 8px; display: none; }
-  .result .big { font-size: 1.8rem; font-weight: 700; color: var(--ok); }
-  .msg { margin-top: 10px; font-size: .9rem; color: var(--ok); }
-  .err { color: #b00020; }
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
-  .kpi { background: #faf6f1; border-radius: 8px; padding: 10px; text-align: center; }
-  .kpi b { display: block; font-size: 1.25rem; color: var(--brand); }
+  h2 { margin: 0 0 12px; font-size: 1.12rem; font-weight: 800; color: var(--plum); display: flex; align-items: center; gap: 8px; }
+  label { display: block; margin-top: 12px; font-weight: 700; font-size: .88rem; color: var(--plum); }
+  input, select { width: 100%; padding: 10px 12px; margin-top: 5px; border-radius: 12px; border: 1.5px solid var(--petal); background: #fff; font: inherit; color: var(--ink); }
+  input:focus, select:focus { outline: none; border-color: var(--pom); box-shadow: 0 0 0 3px var(--blush); }
+  .row { display: flex; gap: 8px; align-items: flex-end; }
+  .row > div { flex: 1; }
+  button { margin-top: 16px; padding: 11px 22px; background: var(--pom); color: var(--cream); border: 0; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 700; transition: transform .1s, background .2s; }
+  button:hover { background: var(--pom-d); transform: translateY(-1px); }
+  button.secondary { background: var(--gold-d); margin-top: 0; padding: 10px 14px; font-size: .82rem; white-space: nowrap; }
+  button.secondary:hover { background: #7d5a18; }
+  .result { margin-top: 16px; padding: 16px; background: var(--blush); border: 1px solid var(--rose); border-radius: 16px; display: none; }
+  .result .big { font-size: 2.2rem; font-weight: 800; color: var(--pom); line-height: 1.1; margin: 4px 0; }
+  .drivers { margin: 10px 0 0; padding: 0; list-style: none; font-size: .86rem; }
+  .drivers li { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--rose); padding: 4px 0; }
+  .pos { color: var(--pom); font-weight: 700; } .neg { color: var(--warn); font-weight: 700; }
+  .msg { margin-top: 10px; font-size: .9rem; color: var(--pom); font-weight: 600; }
+  .err { color: var(--warn); }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 5px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: var(--cream-2); border: 1px solid var(--line); border-radius: 16px; padding: 12px; text-align: center; }
+  .kpi b { display: block; font-size: 1.35rem; color: var(--plum); }
   .kpi span { font-size: .75rem; color: var(--muted); }
-  .bar-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: .85rem; }
-  .bar-row .name { width: 130px; }
-  .bar-track { flex: 1; height: 12px; background: #eee; border-radius: 6px; position: relative; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: .86rem; }
+  .bar-row .name { width: 160px; color: var(--plum); font-weight: 600; }
+  .bar-track { flex: 1; height: 12px; background: var(--cream-2); border-radius: 6px; position: relative; }
+  .bar-track::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--petal); }
   .bar-fill { position: absolute; top: 0; height: 100%; border-radius: 6px; }
-  .bar-row .val { width: 70px; text-align: right; color: var(--muted); }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .85rem; }
-  th, td { border: 1px solid #e3e3e3; padding: 6px; text-align: center; }
-  th { background: var(--brand); color: #fff; }
-  .note { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+  .bar-row .val { width: 60px; text-align: right; color: var(--muted); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: .86rem; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  th, td { padding: 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  th { background: var(--pom); color: var(--cream); font-weight: 700; }
+  tr:nth-child(even) td { background: var(--cream); }
+  tr:last-child td { border-bottom: 0; }
+  .note { font-size: .8rem; color: var(--muted); margin-top: 10px; }
   @media (max-width: 760px) { main { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Chef Rico's Food Truck - Demand Forecast Dashboard</h1>
-  <p>Cloud-based machine learning system for daily demand forecasting</p>
+  <h1>🍔 Chef Rico's Midnight Burgers</h1>
+  <p>Demand forecast dashboard: how many burgers should we prepare tonight?</p>
 </header>
 
 <main>
   <section class="card">
-    <h2>Forecast demand for a day</h2>
+    <h2>🔮 Forecast burgers for a night</h2>
     <label for="p_date">Date</label>
     <input type="date" id="p_date">
-    <label for="p_promo">Promotion running?</label>
-    <select id="p_promo"><option value="0">No</option><option value="1">Yes</option></select>
-    <label for="p_school">School holiday?</label>
-    <select id="p_school"><option value="0">No</option><option value="1">Yes</option></select>
+
+    <label for="p_weather">Weather that night (Westlands, Nairobi)</label>
+    <div class="row">
+      <div>
+        <select id="p_weather" onchange="presetChanged()">
+          <option value="0">Dry</option>
+          <option value="3">Light rain</option>
+          <option value="15">Heavy rain</option>
+          <option value="custom">Custom (mm)</option>
+        </select>
+      </div>
+      <div><input type="number" id="p_rain" min="0" step="0.1" value="0" aria-label="Rainfall in millimetres"></div>
+      <button class="secondary" type="button" onclick="useLiveWeather()">Use live forecast</button>
+    </div>
+    <div class="hint" id="weather_hint">Rainfall in mm. "Use live forecast" fetches the real weather forecast (next 16 days).</div>
+
+    <label for="p_event">Big Nairobi event nearby? (concert, match, festival)</label>
+    <select id="p_event"><option value="0">No</option><option value="1">Yes</option></select>
+
+    <label for="p_ntsa">NTSA crackdown expected?</label>
+    <select id="p_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
+
+    <div class="hint">Pay-day window and public holidays are detected automatically from the date.</div>
     <button onclick="predictDemand()">Forecast</button>
     <div class="result" id="p_result"></div>
   </section>
 
   <section class="card">
-    <h2>Record a day's actual sales</h2>
+    <h2>📝 Record a night's actual sales</h2>
     <label for="s_date">Date</label>
     <input type="date" id="s_date">
-    <label for="s_promo">Promotion running?</label>
-    <select id="s_promo"><option value="0">No</option><option value="1">Yes</option></select>
-    <label for="s_school">School holiday?</label>
-    <select id="s_school"><option value="0">No</option><option value="1">Yes</option></select>
-    <label for="s_sales">Actual daily sales</label>
-    <input type="number" id="s_sales" min="0" placeholder="e.g. 5200">
+    <label for="s_rain">Rainfall that night (mm)</label>
+    <input type="number" id="s_rain" min="0" step="0.1" value="0">
+    <label for="s_event">Big Nairobi event nearby?</label>
+    <select id="s_event"><option value="0">No</option><option value="1">Yes</option></select>
+    <label for="s_ntsa">NTSA crackdown that night?</label>
+    <select id="s_ntsa"><option value="0">No</option><option value="1">Yes</option></select>
+    <label for="s_sales">Burgers sold</label>
+    <input type="number" id="s_sales" min="0" placeholder="e.g. 120">
     <button onclick="addSale()">Save record</button>
     <div class="msg" id="s_msg"></div>
+    <div class="hint">Saved records go to the cloud database and can be used to retrain the model on real data.</div>
   </section>
 
   <section class="card wide">
-    <h2>Model performance and what drives demand</h2>
+    <h2>✨ Model performance and what drives demand</h2>
     <div class="kpis" id="kpis"></div>
     <div id="effects"></div>
     <p class="note" id="model_note"></p>
   </section>
 
   <section class="card wide">
-    <h2>Demand trend</h2>
+    <h2>📈 Demand trend</h2>
     <canvas id="trendChart" height="110"></canvas>
     <table id="salesTable">
-      <thead><tr><th>Date</th><th>Day</th><th>Promo</th><th>School holiday</th><th>Sales</th></tr></thead>
+      <thead><tr><th>Date</th><th>Day</th><th>Rain (mm)</th><th>Event</th><th>NTSA</th><th>Burgers sold</th></tr></thead>
       <tbody></tbody>
     </table>
     <p class="note" id="table_note"></p>
@@ -93,10 +134,38 @@
 
 <script>
 const API = location.origin.startsWith("http") ? location.origin : "http://127.0.0.1:8000";
+const WESTLANDS = { lat: -1.2676, lon: 36.8108 };
 const yn = v => (v ? "Yes" : "No");
-const today = new Date().toISOString().slice(0, 10);
-document.getElementById("p_date").value = today;
-document.getElementById("s_date").value = today;
+const C = { line: "#9b1b3a", fill: "rgba(217,102,122,.22)", pos: "#9b1b3a", neg: "#c79a4b" };
+const todayStr = new Date().toISOString().slice(0, 10);
+document.getElementById("p_date").value = todayStr;
+document.getElementById("s_date").value = todayStr;
+
+function presetChanged() {
+  const v = document.getElementById("p_weather").value;
+  if (v !== "custom") document.getElementById("p_rain").value = v;
+}
+
+async function useLiveWeather() {
+  const hint = document.getElementById("weather_hint");
+  const date = document.getElementById("p_date").value;
+  hint.textContent = "Fetching live forecast...";
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + WESTLANDS.lat + "&longitude=" + WESTLANDS.lon +
+                "&daily=precipitation_sum&timezone=Africa%2FNairobi&forecast_days=16";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("service unavailable");
+    const d = await res.json();
+    const i = d.daily.time.indexOf(date);
+    if (i < 0) { hint.textContent = "Live forecasts only cover the next 16 days. Pick a nearer date or enter rainfall manually."; return; }
+    const mm = d.daily.precipitation_sum[i] || 0;
+    document.getElementById("p_rain").value = mm;
+    document.getElementById("p_weather").value = "custom";
+    hint.textContent = "Live forecast for Westlands on " + date + ": " + mm + " mm of rain.";
+  } catch (e) {
+    hint.textContent = "Could not reach the weather service. Choose Dry / Light / Heavy rain manually.";
+  }
+}
 
 async function predictDemand() {
   const box = document.getElementById("p_result");
@@ -107,17 +176,20 @@ async function predictDemand() {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         date: document.getElementById("p_date").value,
-        is_promo: Number(document.getElementById("p_promo").value),
-        is_school_holiday: Number(document.getElementById("p_school").value),
+        rain_mm: Number(document.getElementById("p_rain").value) || 0,
+        is_event: Number(document.getElementById("p_event").value),
+        is_ntsa_crackdown: Number(document.getElementById("p_ntsa").value),
       })
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || "Request failed");
+    const drivers = d.drivers.map(x =>
+      `<li><span>${x.factor}</span><span class="${x.effect >= 0 ? "pos" : "neg"}">${x.effect >= 0 ? "+" : ""}${x.effect}</span></li>`).join("");
     box.innerHTML = `<div>${d.day}, ${d.date}</div>
-      <div class="big">${d.predicted_sales.toLocaleString()}</div>
-      <div>Likely range: ${d.likely_range_low.toLocaleString()} - ${d.likely_range_high.toLocaleString()}
-      (typical error about ${Math.round(d.typical_error_mae).toLocaleString()})</div>
-      ${d.warning ? `<div class="err" style="margin-top:6px">${d.warning}</div>` : ""}`;
+      <div class="big">${d.predicted_burgers} burgers</div>
+      <div>Likely range: ${d.likely_range_low} - ${d.likely_range_high} (typical error about ${Math.round(d.typical_error_mae)})</div>
+      <div class="hint">Prepare around ${d.predicted_burgers}; keep a small buffer up to ${d.likely_range_high} on busy nights.</div>
+      <ul class="drivers">${drivers}</ul>`;
   } catch (e) { box.innerHTML = `<span class="err">${e.message}</span>`; }
 }
 
@@ -129,13 +201,14 @@ async function addSale() {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         date: document.getElementById("s_date").value,
-        is_promo: Number(document.getElementById("s_promo").value),
-        is_school_holiday: Number(document.getElementById("s_school").value),
-        daily_sales: Number(document.getElementById("s_sales").value),
+        rain_mm: Number(document.getElementById("s_rain").value) || 0,
+        is_event: Number(document.getElementById("s_event").value),
+        is_ntsa_crackdown: Number(document.getElementById("s_ntsa").value),
+        burgers_sold: Number(document.getElementById("s_sales").value),
       })
     });
     const d = await res.json();
-    if (!res.ok) throw new Error("Please check the date and sales value.");
+    if (!res.ok) throw new Error("Please check the date and the number of burgers.");
     msg.textContent = "Saved (record #" + d.id + ").";
     loadTrends();
   } catch (e) { msg.className = "msg err"; msg.textContent = e.message; }
@@ -149,18 +222,18 @@ async function loadTrends() {
   tbody.innerHTML = "";
   sales.slice(-12).reverse().forEach(s => {
     const tr = document.createElement("tr");
-    [s.date, s.day, yn(s.is_promo), yn(s.is_school_holiday), s.daily_sales]
+    [s.date, s.day, s.rain_mm, yn(s.is_event), yn(s.is_ntsa_crackdown), s.burgers_sold]
       .forEach(v => { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
     tbody.appendChild(tr);
   });
   document.getElementById("table_note").textContent =
-    "Showing the latest 12 of " + sales.length + " stored records (cloud PostgreSQL database).";
+    "Showing the latest 12 of " + sales.length + " stored nights (cloud PostgreSQL database).";
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById("trendChart"), {
     type: "line",
     data: { labels: sales.map(s => s.date),
-            datasets: [{ label: "Daily sales", data: sales.map(s => s.daily_sales),
-                         borderColor: "#b5451b", backgroundColor: "rgba(181,69,27,.1)",
+            datasets: [{ label: "Burgers sold", data: sales.map(s => s.burgers_sold),
+                         borderColor: C.line, backgroundColor: C.fill,
                          fill: true, tension: .25, pointRadius: 0, borderWidth: 1.5 }] },
     options: { responsive: true, scales: { x: { ticks: { maxTicksLimit: 8 } } } }
   });
@@ -172,17 +245,17 @@ async function loadModel() {
     if (!res.ok) throw new Error();
     const m = await res.json();
     const k = [
-      [Math.round(m.metrics.mae).toLocaleString(), "Typical error (MAE)"],
+      [m.metrics.mae.toFixed(1), "Typical error (burgers)"],
       [m.metrics.mape.toFixed(1) + "%", "Average % error"],
       [m.metrics.r2.toFixed(2), "R-squared"],
-      [m.dataset.rows.toLocaleString(), "Days of history"],
+      [m.dataset.rows.toLocaleString(), "Nights of history"],
     ];
     document.getElementById("kpis").innerHTML =
       k.map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("");
-    const labels = { is_promo: "Promotion", is_school_holiday: "School holiday",
-                     is_payday: "Payday window", season_sin: "Seasonality (sine)", season_cos: "Seasonality (cosine)", dow_2: "Tuesday vs Monday", dow_3: "Wednesday vs Monday",
-                     dow_4: "Thursday vs Monday", dow_5: "Friday vs Monday", dow_6: "Saturday vs Monday",
-                     dow_7: "Sunday vs Monday" };
+    const labels = { is_event: "Nairobi event nearby", is_payday: "Pay-day window", is_public_holiday: "Public holiday",
+                     is_ntsa_crackdown: "NTSA crackdown", rain_mm: "Each 1 mm of rain",
+                     dow_2: "Tuesday vs Monday", dow_3: "Wednesday vs Monday", dow_4: "Thursday vs Monday",
+                     dow_5: "Friday vs Monday", dow_6: "Saturday vs Monday", dow_7: "Sunday vs Monday" };
     const skip = (m.days_without_data || []).map(d => "dow_" + d);
     const entries = Object.entries(m.coefficients).filter(([f]) => !skip.includes(f));
     const max = Math.max(...entries.map(([, c]) => Math.abs(c)));
@@ -190,14 +263,15 @@ async function loadModel() {
       .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
       .map(([f, c]) => {
         const w = Math.abs(c) / max * 50;
-        const style = c >= 0 ? `left:50%;width:${w}%;background:#b5451b` : `left:${50 - w}%;width:${w}%;background:#185fa5`;
+        const style = c >= 0 ? `left:50%;width:${w}%;background:${C.pos}` : `left:${50 - w}%;width:${w}%;background:${C.neg}`;
         return `<div class="bar-row"><div class="name">${labels[f] || f}</div>
           <div class="bar-track"><div class="bar-fill" style="${style}"></div></div>
-          <div class="val">${c >= 0 ? "+" : ""}${Math.round(c)}</div></div>`;
+          <div class="val">${c >= 0 ? "+" : ""}${c.toFixed(1)}</div></div>`;
       }).join("");
     document.getElementById("model_note").textContent =
-      `${m.model_name}, trained on ${m.dataset.source}, ${m.dataset.start} to ${m.dataset.end}. ` +
-      `Bars show how much each factor raises (right) or lowers (left) expected daily sales.`;
+      `${m.model_name} trained on ${m.dataset.rows} nights (${m.dataset.start} to ${m.dataset.end}). ` +
+      `Bars show how many burgers each factor adds (right) or removes (left) on a night. ` +
+      `Training data: simulated case-study history; replace with Chef Rico's real records as they are captured.`;
   } catch (e) {
     document.getElementById("model_note").textContent = "Model information is not available yet.";
   }

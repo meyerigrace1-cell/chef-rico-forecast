@@ -1,7 +1,7 @@
 {
   "model_name": "Multiple Linear Regression (OLS)",
   "version": "1.0.0",
-  "trained_at": "2026-11-10T06:50:34+00:00",
+  "trained_at": "2026-11-13T03:51:35+00:00",
   "features": [
     "dow_2",
     "dow_3",
@@ -10,72 +10,70 @@
     "dow_6",
     "dow_7",
     "is_payday",
-    "is_promo",
-    "is_school_holiday",
-    "season_sin",
-    "season_cos"
+    "is_public_holiday",
+    "is_event",
+    "is_ntsa_crackdown",
+    "rain_mm"
   ],
-  "intercept": 4392.2093,
+  "intercept": 69.491,
   "coefficients": {
-    "dow_2": -460.1028,
-    "dow_3": -589.21,
-    "dow_4": -709.2026,
-    "dow_5": -354.7722,
-    "dow_6": 479.5774,
-    "dow_7": -0.0,
-    "is_payday": 471.5763,
-    "is_promo": 1247.5176,
-    "is_school_holiday": 56.7955,
-    "season_sin": 140.635,
-    "season_cos": 318.3311
+    "dow_2": 3.3806,
+    "dow_3": 5.8094,
+    "dow_4": 20.0648,
+    "dow_5": 47.3556,
+    "dow_6": 54.5898,
+    "dow_7": 8.7968,
+    "is_payday": 28.0785,
+    "is_public_holiday": 16.5498,
+    "is_event": 48.5163,
+    "is_ntsa_crackdown": -32.1553,
+    "rain_mm": -1.8349
   },
   "metrics": {
-    "mae": 419.64,
-    "rmse": 536.01,
-    "r2": 0.6136,
-    "mape": 9.75
+    "mae": 8.95,
+    "rmse": 11.26,
+    "r2": 0.8976,
+    "mape": 9.8
   },
-  "baseline_mae": 776.51,
+  "baseline_mae": 26.63,
   "comparison": [
     {
       "model": "Baseline (training mean)",
-      "mae": 776.51,
-      "rmse": 914.68,
-      "r2": -0.1253,
-      "mape": 18.58
+      "mae": 26.63,
+      "rmse": 35.48,
+      "r2": -0.0168,
+      "mape": 29.71
     },
     {
       "model": "Linear Regression",
-      "mae": 419.64,
-      "rmse": 536.01,
-      "r2": 0.6136,
-      "mape": 9.75
+      "mae": 8.95,
+      "rmse": 11.26,
+      "r2": 0.8976,
+      "mape": 9.8
     },
     {
       "model": "Random Forest (tuned)",
-      "mae": 387.84,
-      "rmse": 481.67,
-      "r2": 0.6879,
-      "mape": 9.08
+      "mae": 10.67,
+      "rmse": 14.17,
+      "r2": 0.8379,
+      "mape": 11.6
     }
   ],
   "random_forest_params": {
-    "n_estimators": 100,
-    "max_depth": null,
+    "n_estimators": 300,
+    "max_depth": 8,
     "min_samples_leaf": 1
   },
-  "days_without_data": [
-    7
-  ],
+  "days_without_data": [],
   "split": {
-    "train": 546,
-    "validation": 117,
-    "test": 118
+    "train": 724,
+    "validation": 155,
+    "test": 156
   },
   "dataset": {
-    "source": "Kaggle - Rossmann Store Sales (Store 1, trading days)",
-    "rows": 781,
-    "start": "2013-01-02",
-    "end": "2015-07-31"
+    "source": "Chef Rico case-study dataset (simulated nightly demand; see figures/data_assumptions.json)",
+    "rows": 1035,
+    "start": "2024-01-01",
+    "end": "2026-10-31"
   }
 }

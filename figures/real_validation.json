@@ -1,0 +1,32 @@
+{
+  "file": "real_pizza_daily.csv",
+  "days": 358,
+  "target": "pizzas_sold",
+  "weather_cols": [],
+  "results": {
+    "Training average": {
+      "MAE": 21.91,
+      "RMSE": 31.41,
+      "R2": -0.003,
+      "MAPE%": 16.6
+    },
+    "Average for that weekday": {
+      "MAE": 17.97,
+      "RMSE": 26.9,
+      "R2": 0.264,
+      "MAPE%": 13.6
+    },
+    "Linear: weekday + month-end": {
+      "MAE": 17.94,
+      "RMSE": 26.86,
+      "R2": 0.267,
+      "MAPE%": 13.6
+    },
+    "Random forest": {
+      "MAE": 17.93,
+      "RMSE": 26.55,
+      "R2": 0.283,
+      "MAPE%": 13.5
+    }
+  }
+}

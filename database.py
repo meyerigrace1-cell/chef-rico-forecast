@@ -1,7 +1,7 @@
 """Database connection (Neon PostgreSQL) and the sales table definition."""
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, Date
+from sqlalchemy import create_engine, Column, Integer, Float, Date
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 load_dotenv()
@@ -27,12 +27,14 @@ Base = declarative_base()
 
 
 class Sale(Base):
-    __tablename__ = "sales_records"
+    __tablename__ = "burger_sales"
 
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date, nullable=False, index=True)
-    day_of_week = Column(Integer, nullable=False)       # 1 = Monday ... 7 = Sunday
+    day_of_week = Column(Integer, nullable=False)        # 1 = Monday ... 7 = Sunday
     is_payday = Column(Integer, nullable=False)
-    is_promo = Column(Integer, nullable=False)
-    is_school_holiday = Column(Integer, nullable=False)
-    daily_sales = Column(Integer, nullable=False)
+    is_public_holiday = Column(Integer, nullable=False)
+    is_event = Column(Integer, nullable=False)
+    is_ntsa_crackdown = Column(Integer, nullable=False)
+    rain_mm = Column(Float, nullable=False)
+    burgers_sold = Column(Integer, nullable=False)

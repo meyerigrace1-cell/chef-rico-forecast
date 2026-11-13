@@ -3,9 +3,10 @@ venv/
 .env
 __pycache__/
 *.pyc
-# Large raw Kaggle files (the prepared dataset is small and IS committed)
+# Old Rossmann files (no longer used) - never commit these large files
 train.csv
 test.csv
 store.csv
 kaggle_train.csv
+rossmann-tmp/
 *.zip

@@ -44,9 +44,9 @@ os.makedirs("figures", exist_ok=True)
 
 # ---------------------------------------------------------------- data ------
 df = pd.read_csv("chef_rico_sales_data.csv", parse_dates=["date"]).sort_values("date").reset_index(drop=True)
-X = np.array([[feature_dict(r.date.date(), r.is_promo, r.is_school_holiday)[f]
+X = np.array([[feature_dict(r.date.date(), r.is_event, r.is_ntsa_crackdown, r.rain_mm)[f]
                for f in FEATURES] for r in df.itertuples()], dtype=float)
-y = df["daily_sales"].values.astype(float)
+y = df["burgers_sold"].values.astype(float)
 
 days_without_data = [d for d in range(1, 8) if (df["day_of_week"] == d).sum() == 0]
 if days_without_data:
@@ -115,7 +115,7 @@ print(f"{'Model':<28}{'MAE':>10}{'RMSE':>10}{'R2':>8}{'MAPE %':>9}")
 for r in results:
     print(f"{r['model']:<28}{r['mae']:>10}{r['rmse']:>10}{r['r2']:>8}{r['mape']:>9}")
 
-print("\nLinear Regression coefficients (effect on daily sales, other factors held equal):")
+print("\nLinear Regression coefficients (effect on burgers sold, other factors held equal):")
 print(f"  {'intercept':<20}{intercept:>10.1f}")
 for f, c in zip(FEATURES, coefs):
     print(f"  {f:<20}{c:>10.1f}")
@@ -135,7 +135,7 @@ artifact = {
     "days_without_data": days_without_data,
     "split": {"train": len(X_tr), "validation": len(X_va), "test": len(X_te)},
     "dataset": {
-        "source": "Kaggle - Rossmann Store Sales (Store 1, trading days)",
+        "source": "Chef Rico case-study dataset (simulated nightly demand; see figures/data_assumptions.json)",
         "rows": n,
         "start": str(df["date"].min().date()),
         "end": str(df["date"].max().date()),
@@ -154,8 +154,8 @@ plt.plot(test_dates, y_te, label="Actual", linewidth=1.5)
 plt.plot(test_dates, lin_pred, label="Linear Regression", linewidth=1.5)
 if rf_pred is not None:
     plt.plot(test_dates, rf_pred, label="Random Forest", linewidth=1.5, alpha=0.8)
-plt.title("Actual vs predicted daily sales (unseen test period)")
-plt.xlabel("Date"); plt.ylabel("Sales"); plt.legend(); plt.tight_layout()
+plt.title("Actual vs predicted burgers sold (unseen test period)")
+plt.xlabel("Date"); plt.ylabel("Burgers sold"); plt.legend(); plt.tight_layout()
 plt.savefig("figures/05_actual_vs_predicted.png", dpi=150); plt.close()
 
 names = [r["model"] for r in results]
@@ -168,6 +168,6 @@ order = np.argsort(np.abs(coefs))
 plt.figure(figsize=(7, 5))
 plt.barh([FEATURES[i] for i in order], [coefs[i] for i in order],
          color=["#b5451b" if coefs[i] >= 0 else "#185fa5" for i in order])
-plt.title("Linear model: effect of each factor on daily sales"); plt.xlabel("Change in sales")
+plt.title("Linear model: effect of each factor on burgers sold"); plt.xlabel("Change in burgers sold")
 plt.tight_layout(); plt.savefig("figures/07_feature_effects.png", dpi=150); plt.close()
 print("Saved charts -> figures/05..07 *.png" if CHARTS_OK else "Charts skipped (matplotlib unavailable).")
